@@ -27,6 +27,7 @@ public class BridgeController : MonoBehaviour
         else if (isFalling)
         {
             FallBridge();
+            return;
         }
     }
     
@@ -37,6 +38,7 @@ public class BridgeController : MonoBehaviour
             isGrowing = true;
             isFalling = false;
             currentLength = 0f;
+            bridgeVisual.localScale = new Vector3(1f, currentLength, 1f);
         }
     }
     
@@ -46,7 +48,7 @@ public class BridgeController : MonoBehaviour
         {
             isGrowing = false;
             isFalling = true;
-            targetRotation = 0f; // Горизонтальное положение
+            targetRotation = 0f;
         }
     }
     
@@ -54,19 +56,15 @@ public class BridgeController : MonoBehaviour
     {
         currentLength += growSpeed * Time.deltaTime;
         currentLength = Mathf.Min(currentLength, maxLength);
-        
-        // Обновляем визуал моста (масштаб по Y)
         bridgeVisual.localScale = new Vector3(1f, currentLength, 1f);
     }
     
     void FallBridge()
     {
-        // Плавно поворачиваем мост в горизонтальное положение
         float currentRotation = transform.eulerAngles.z;
         float newRotation = Mathf.LerpAngle(currentRotation, targetRotation, fallSpeed * Time.deltaTime);
         transform.rotation = Quaternion.Euler(0f, 0f, newRotation);
         
-        // Проверяем, достигли ли целевого положения
         if (Mathf.Abs(Mathf.DeltaAngle(currentRotation, targetRotation)) < 1f)
         {
             isFalling = false;
@@ -77,13 +75,11 @@ public class BridgeController : MonoBehaviour
     
     void OnBridgePlaced()
     {
-        // Запускаем движение героя
         GameManager.Instance.hero.StartMoving();
     }
     
     public Vector2 GetEndPosition()
     {
-        // Возвращает позицию конца моста
         return bridgeVisual.position + bridgeVisual.up * currentLength;
     }
     
