@@ -1,15 +1,20 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace OverBridge
 {
     public class BridgeController : MonoBehaviour
     {
+        public UnityEvent BridgeDown;
+
         private PlayerInput _playerInput;
         float currentLength = 0f;
         float buildSpeed = 1f;
         public bool IsBuild = false;
-        bool isBridgeCompeate = false;
+        bool isBridgeCompleate = false;
         [SerializeField] private GameObject bridgeVisual;
+        [SerializeField] private CharackterController _charackterController;
 
         void Awake()
         {
@@ -19,7 +24,6 @@ namespace OverBridge
 
         void FixedUpdate()
         {
-
             if (IsBuild && bridgeVisual.transform.localScale.y <= 0f)
             {
                 BuildBridge();
@@ -30,7 +34,10 @@ namespace OverBridge
             }
             else if (!IsBuild && bridgeVisual.transform.localScale.y > 0f)
             {
-                DownBridge();
+                if (!isBridgeCompleate)
+                {
+                    DownBridge();
+                }                
             }
         }
 
@@ -45,21 +52,34 @@ namespace OverBridge
         {
             Debug.Log("Мост падает");
 
-            // Текущий угол поворота по Z
+            
             float currentZAngle = bridgeVisual.transform.eulerAngles.z;
-            // Конвертируем в диапазон -180 до 180
+            
             if (currentZAngle > 180f) currentZAngle -= 360f;
 
             if (currentZAngle <= -90f)
             {
                 Debug.Log("Мост полностью опустился");
+                BridgeDown.Invoke();
                 Debug.Log("Персонаж начал идти прямо");
+                isBridgeCompleate = true;
                 return;
             }
 
             // Плавное вращение
-            float rotation = 30f * Time.deltaTime;
+            float rotation = 30f * Time.fixedDeltaTime;
             bridgeVisual.transform.Rotate(0, 0, -rotation);
+        }
+
+        public void DeffoltBridge()
+        {
+            bridgeVisual.transform.eulerAngles = new Vector3(0f, 0f, 0f);
+            bridgeVisual.transform.localScale = new Vector3(1f, 0f, 1f);
+            currentLength = 0f;
+
+            bridgeVisual.transform.position = _charackterController.buildBridgePoin.position;
+
+            isBridgeCompleate = false;
         }
     }
 }
